@@ -1,0 +1,70 @@
+# Builds a STATIC PREVIEW of the public site and deploys it to GitHub Pages.
+#
+# One-time setup: repo Settings → Pages → Build and deployment →
+#   Source: "GitHub Actions"   (not "Deploy from a branch", which shows the README)
+#
+# GitHub Pages can only host static files, so server features (auth, payments,
+# webhooks, real 404 status via proxy) are not available here. The full app
+# from Phase 2 onward must be deployed to a server platform such as Vercel.
+name: Deploy static preview to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check types, lint and unit tests
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Prepare checkout for static export
+        run: node scripts/prepare-static-export.mjs
+
+      - name: Build static site
+        env:
+          STATIC_EXPORT: "true"
+          # Serves from https://<owner>.github.io/<repo>/
+          PAGES_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        run: npx next build
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
