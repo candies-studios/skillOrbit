@@ -46,6 +46,23 @@ Useful URLs:
 - Integrations without credentials show a "not configured" state. Forms never claim success they didn't achieve.
 - Money is always integer minor units (paise) with an ISO currency code.
 
+## Deployment
+
+### GitHub Pages: static preview (works now)
+
+`.github/workflows/deploy-pages.yml` builds a static export of the public site on every push to `main` and publishes it to `https://<owner>.github.io/<repo>/`.
+
+One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions.** If Source is "Deploy from a branch", Pages shows this README instead of the site.
+
+The preview has limits:
+
+- It shows the public pages with sample data. It is not indexed by search engines.
+- Server features can't run on GitHub Pages: sign-in, database, payments, webhooks, emails and true 404 status codes.
+
+### Vercel: the real app (needed from Phase 2)
+
+Import the repo in Vercel and add the env vars from `.env.example`. No build settings need changing. This is where auth, Supabase and Razorpay will run.
+
 ## Manual setup still to come
 
-Supabase project setup, Razorpay test keys and webhook, Resend domain verification and Vercel deployment are documented as each phase lands (see the Phase 2 steps in `DEVELOPMENT_STATUS.md`).
+Supabase project setup, Razorpay test keys and webhook, and Resend domain verification are documented as each phase lands (see `DEVELOPMENT_STATUS.md`).

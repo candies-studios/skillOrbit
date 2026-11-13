@@ -5,29 +5,35 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
 import { Notice } from "@/components/ui/feedback";
 import { contactSchema, fieldErrors } from "@/lib/validation/forms";
-import { submitContact, type ContactState } from "./actions";
 
+/**
+ * Contact form. Validates in the browser and, until Phase 2 adds a
+ * support_tickets store (server action, re-validated with the same schema),
+ * reports honestly that the message was not sent.
+ */
 export function ContactForm({ supportEmail }: { supportEmail: string }) {
-  const [state, action, pending] = React.useActionState<ContactState, FormData>(submitContact, { status: "idle" });
-  const [clientErrors, setClientErrors] = React.useState<Record<string, string>>({});
-  const errors = { ...(state.status === "invalid" ? state.errors : {}), ...clientErrors };
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [unconfigured, setUnconfigured] = React.useState(false);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    const fd = new FormData(e.currentTarget);
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    if (fd.get("company_website")) return; // honeypot
     const parsed = contactSchema.safeParse(Object.fromEntries(fd));
     if (!parsed.success) {
-      e.preventDefault();
-      setClientErrors(fieldErrors(parsed.error));
-      const first = e.currentTarget.querySelector<HTMLElement>("[aria-invalid='true']");
-      first?.focus();
+      setErrors(fieldErrors(parsed.error));
+      setUnconfigured(false);
+      requestAnimationFrame(() => form.querySelector<HTMLElement>("[aria-invalid='true']")?.focus());
       return;
     }
-    setClientErrors({});
+    setErrors({});
+    setUnconfigured(true);
   }
 
   return (
-    <form action={action} onSubmit={onSubmit} noValidate className="space-y-5">
-      {state.status === "unconfigured" && (
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
+      {unconfigured && (
         <Notice tone="unconfigured" title="Your message was not sent">
           The contact inbox isn&apos;t connected yet, so we couldn&apos;t deliver this message.{" "}
           {supportEmail ? (
@@ -80,9 +86,7 @@ export function ContactForm({ supportEmail }: { supportEmail: string }) {
         <label htmlFor="company_website">Leave this empty</label>
         <input id="company_website" name="company_website" tabIndex={-1} autoComplete="off" />
       </div>
-      <Button type="submit" loading={pending}>
-        Send message
-      </Button>
+      <Button type="submit">Send message</Button>
     </form>
   );
 }

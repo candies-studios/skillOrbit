@@ -35,6 +35,7 @@ Legend: `[x]` done and verified · `[~]` partial (UI only, or placeholder) · `[
 - [x] Login, register, forgot password (validated; report "not connected" honestly)
 - [~] Privacy, Terms, Refund policies — **drafts for legal review**, with visible placeholders for business details
 - [x] 404 page (real 404 status via `proxy.ts`), error boundary, sitemap, robots
+- [x] GitHub Pages static preview workflow (`STATIC_EXPORT=true`; catalogue filtering runs client-side so it works statically)
 
 **Verification**
 
@@ -47,7 +48,7 @@ Legend: `[x]` done and verified · `[~]` partial (UI only, or placeholder) · `[
 
 - [~] Course imagery is generated cover art; real images come with Storage (Phase 3)
 - [~] Catalogue uses clearly labelled development seed data
-- [ ] Contact messages are not stored (needs `support_tickets`, Phase 2)
+- [ ] Contact messages are not stored (needs `support_tickets` + a server action, Phase 2 — server-only, so not on the Pages preview)
 - [ ] Security headers / CSP not yet configured (Phase 10)
 
 ## Phase 2 — Supabase, auth, roles, RLS
