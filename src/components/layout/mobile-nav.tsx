@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import type { NavLink } from "@/config/navigation";
 import { Dialog, DialogTrigger, SheetContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import { isActivePath } from "./nav-links";
 
@@ -45,16 +46,7 @@ export function MobileNav({ links }: { links: NavLink[] }) {
           </ul>
         </nav>
         <div className="space-y-2 border-t border-line p-5">
-          <Button asChild className="w-full">
-            <Link href="/register" onClick={() => setOpen(false)}>
-              Create account
-            </Link>
-          </Button>
-          <Button asChild variant="secondary" className="w-full">
-            <Link href="/login" onClick={() => setOpen(false)}>
-              Log in
-            </Link>
-          </Button>
+          <UserMenu variant="mobile" onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Dialog>

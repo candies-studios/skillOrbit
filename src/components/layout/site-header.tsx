@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { primaryNav } from "@/config/navigation";
-import { Button } from "@/components/ui/button";
 import { Container, Logo } from "./primitives";
 import { MobileNav } from "./mobile-nav";
 import { NavLinks } from "./nav-links";
+import { UserMenu } from "./user-menu";
 
 export function SiteHeader() {
   return (
@@ -14,12 +13,7 @@ export function SiteHeader() {
           <NavLinks links={primaryNav} />
         </nav>
         <div className="ml-auto hidden items-center gap-2 lg:flex">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/register">Create account</Link>
-          </Button>
+          <UserMenu />
         </div>
         <div className="ml-auto lg:hidden">
           <MobileNav links={primaryNav} />

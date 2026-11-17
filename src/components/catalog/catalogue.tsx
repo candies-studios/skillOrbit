@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
 import Link from "next/link";
 import type { Category, Course, Instructor } from "@/lib/catalog/types";
-import { filterCourses, parseCourseQuery } from "@/lib/catalog/repository";
+import { filterCourses, parseCourseQuery } from "@/lib/catalog/query";
 import { EmptyState } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "./cards";

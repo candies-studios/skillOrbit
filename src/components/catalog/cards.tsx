@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, Clock, BookOpen, ArrowUpRight } from "lucide-react";
 import type { Category, Course, Instructor, MembershipPlan } from "@/lib/catalog/types";
-import { courseStats } from "@/lib/catalog/repository";
+import { courseStats } from "@/lib/catalog/query";
 import { formatMoney, percentOff } from "@/lib/money";
 import { cn, formatDuration, initials } from "@/lib/utils";
 import { Badge, SampleBadge } from "@/components/ui/feedback";
@@ -45,7 +45,12 @@ export function CourseCard({
   const stats = courseStats(course);
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-lg border border-line bg-surface transition-shadow hover:shadow-card">
-      <CourseCover seed={course.id} hue={category?.hue ?? 240} label={category?.shortName} />
+      <CourseCover
+        seed={course.id}
+        hue={category?.hue ?? 240}
+        label={category?.shortName}
+        imageUrl={course.coverImageUrl}
+      />
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge>{LEVEL_LABEL[course.level]}</Badge>
