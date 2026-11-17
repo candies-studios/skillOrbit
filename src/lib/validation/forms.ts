@@ -35,6 +35,10 @@ export const registerSchema = z.object({
   acceptTerms: z.literal("on", { message: "Accept the terms to create an account" }),
 });
 
+export const resetPasswordSchema = z
+  .object({ password: passwordSchema, confirmPassword: z.string() })
+  .refine((v) => v.password === v.confirmPassword, { message: "Passwords don’t match", path: ["confirmPassword"] });
+
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
 });

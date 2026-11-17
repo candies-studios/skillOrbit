@@ -61,6 +61,8 @@ export type Course = {
   isFeatured: boolean;
   publishedAt: string;
   updatedAt: string;
+  /** Public URL of the uploaded cover image, or null for generated art. */
+  coverImageUrl?: string | null;
   /** True for development seed records. Rendered with a visible label. */
   isSample: boolean;
 };
