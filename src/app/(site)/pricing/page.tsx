@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, PageHeader, SectionHeading } from "@/components/layout/primitives";
 import { PricingCard } from "@/components/catalog/cards";
-import { Notice } from "@/components/ui/feedback";
+import { CalendarClock } from "lucide-react";
+import { EmptyState, Notice } from "@/components/ui/feedback";
 import { FaqList } from "@/components/marketing/faq-list";
 import { faqGroups } from "@/content/faq";
 import { listCourses, listMembershipPlans } from "@/lib/catalog/repository";
@@ -33,9 +34,18 @@ export default async function PricingPage() {
           title="Membership checkout isn't live yet"
           className="mb-8 max-w-3xl"
         >
-          Plans and prices below are development samples. Subscriptions will open once payments are connected and
-          tested; the final prices will be set by the platform admin.
+          {plans.some((p) => p.isSample)
+            ? "Plans and prices below are development samples. Subscriptions will open once payments are connected and tested; the final prices will be set by the platform admin."
+            : "Subscriptions will open once payments are connected and tested."}
         </Notice>
+        {plans.length === 0 && (
+          <EmptyState
+            icon={CalendarClock}
+            title="Membership plans haven’t been announced yet"
+            description="Courses can still be enrolled in individually. Check back soon."
+            className="max-w-4xl"
+          />
+        )}
         <div className="grid max-w-4xl gap-5 md:grid-cols-2">
           {plans.map((p) => (
             <PricingCard

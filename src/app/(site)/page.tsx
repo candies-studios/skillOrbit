@@ -106,31 +106,33 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Featured courses */}
-      <section className="border-y border-line bg-surface py-20 sm:py-24">
-        <Container>
-          <SectionHeading
-            title="Featured courses"
-            description="Start with one of these, or search the full catalogue."
-            action={
-              <Button asChild variant="secondary">
-                <Link href="/courses">View catalogue</Link>
-              </Button>
-            }
-          />
-          <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((c) => (
-              <li key={c.id} className="flex">
-                <CourseCard
-                  course={c}
-                  category={categoryBySlug.get(c.categorySlug)}
-                  instructor={instructorBySlug.get(c.instructorSlug)}
-                />
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
+      {/* Featured courses (only once there are published courses) */}
+      {featured.length > 0 && (
+        <section className="border-y border-line bg-surface py-20 sm:py-24">
+          <Container>
+            <SectionHeading
+              title="Featured courses"
+              description="Start with one of these, or search the full catalogue."
+              action={
+                <Button asChild variant="secondary">
+                  <Link href="/courses">View catalogue</Link>
+                </Button>
+              }
+            />
+            <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((c) => (
+                <li key={c.id} className="flex">
+                  <CourseCard
+                    course={c}
+                    category={categoryBySlug.get(c.categorySlug)}
+                    instructor={instructorBySlug.get(c.instructorSlug)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
+      )}
 
       {/* Why learn here */}
       <section className="py-20 sm:py-24">
@@ -178,27 +180,29 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Instructors */}
-      <section className="py-20 sm:py-24">
-        <Container>
-          <SectionHeading
-            title="Learn from practitioners"
-            description="Instructors are reviewed before they can publish, and every course is checked before it goes live."
-            action={
-              <Button asChild variant="secondary">
-                <Link href="/teach">Teach on {brand.name}</Link>
-              </Button>
-            }
-          />
-          <ul className="mt-10 grid gap-5 md:grid-cols-3">
-            {instructors.map((i, idx) => (
-              <li key={i.slug} className="flex [&>*]:flex-1">
-                <InstructorCard instructor={i} courseCount={instructorCourseCounts[idx] ?? 0} />
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
+      {/* Instructors (only approved, real instructors) */}
+      {instructors.length > 0 && (
+        <section className="py-20 sm:py-24">
+          <Container>
+            <SectionHeading
+              title="Learn from practitioners"
+              description="Instructors are reviewed before they can publish, and every course is checked before it goes live."
+              action={
+                <Button asChild variant="secondary">
+                  <Link href="/teach">Teach on {brand.name}</Link>
+                </Button>
+              }
+            />
+            <ul className="mt-10 grid gap-5 md:grid-cols-3">
+              {instructors.map((i, idx) => (
+                <li key={i.slug} className="flex [&>*]:flex-1">
+                  <InstructorCard instructor={i} courseCount={instructorCourseCounts[idx] ?? 0} />
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
+      )}
 
       {/* Membership + affiliate */}
       <section className="pb-20 sm:pb-24">

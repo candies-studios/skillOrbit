@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata: Metadata = { title: "Log in", robots: { index: false } };
@@ -14,7 +15,9 @@ export default function LoginPage() {
           Create an account
         </Link>
       </p>
-      <AuthForm mode="login" />
+      <Suspense>
+        <AuthForm mode="login" />
+      </Suspense>
     </>
   );
 }

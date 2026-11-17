@@ -3,10 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container, PageHeader } from "@/components/layout/primitives";
 import { CourseGrid } from "@/components/catalog/course-grid";
-import { getCategory, listCategories, listCourses } from "@/lib/catalog/repository";
+import { getCategory, listCategories, listCourses, staticParamsOrPlaceholder } from "@/lib/catalog/repository";
 
 export async function generateStaticParams() {
-  return (await listCategories()).map((c) => ({ slug: c.slug }));
+  return staticParamsOrPlaceholder((await listCategories()).map((c) => c.slug));
 }
 
 export async function generateMetadata({ params }: PageProps<"/categories/[slug]">): Promise<Metadata> {

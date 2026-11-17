@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata: Metadata = { title: "Create account", robots: { index: false } };
@@ -14,7 +15,9 @@ export default function RegisterPage() {
           Log in
         </Link>
       </p>
-      <AuthForm mode="register" />
+      <Suspense>
+        <AuthForm mode="register" />
+      </Suspense>
       <p className="mt-6 text-sm text-subtle">
         Want to teach or become an affiliate? Create a student account first, then apply from your dashboard.
       </p>

@@ -5,17 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
 import { Notice } from "@/components/ui/feedback";
 import { contactSchema, fieldErrors } from "@/lib/validation/forms";
+import { getBrowserSupabase } from "@/lib/supabase/client";
 
 /**
- * Contact form. Validates in the browser and, until Phase 2 adds a
- * support_tickets store (server action, re-validated with the same schema),
- * reports honestly that the message was not sent.
+ * Contact form. Validates in the browser, then inserts a support ticket.
+ * The database re-validates every field (check constraints) and RLS only
+ * allows new tickets with status "open". Without Supabase (static preview)
+ * it says plainly that nothing was sent.
  */
 export function ContactForm({ supportEmail }: { supportEmail: string }) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [unconfigured, setUnconfigured] = React.useState(false);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const [status, setStatus] = React.useState<"idle" | "sent" | "failed">("idle");
+  const [pending, setPending] = React.useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
@@ -28,7 +33,24 @@ export function ContactForm({ supportEmail }: { supportEmail: string }) {
       return;
     }
     setErrors({});
-    setUnconfigured(true);
+    const supabase = getBrowserSupabase();
+    if (!supabase) {
+      setUnconfigured(true);
+      return;
+    }
+    setPending(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // No .select(): visitors can create tickets but not read them back.
+    const { error } = await supabase.from("support_tickets").insert({ ...parsed.data, user_id: user?.id ?? null });
+    setPending(false);
+    if (error) {
+      setStatus("failed");
+      return;
+    }
+    setStatus("sent");
+    form.reset();
   }
 
   return (
@@ -47,6 +69,16 @@ export function ContactForm({ supportEmail }: { supportEmail: string }) {
           ) : (
             "Please try again after launch."
           )}
+        </Notice>
+      )}
+      {status === "sent" && (
+        <Notice tone="success" title="Message received">
+          We’ll reply to the email address you gave, usually within 2 working days.
+        </Notice>
+      )}
+      {status === "failed" && (
+        <Notice tone="warning" title="Your message was not sent">
+          Something went wrong on our side. Try again in a moment.
         </Notice>
       )}
       {errors.form && <Notice tone="warning">{errors.form}</Notice>}
@@ -86,7 +118,9 @@ export function ContactForm({ supportEmail }: { supportEmail: string }) {
         <label htmlFor="company_website">Leave this empty</label>
         <input id="company_website" name="company_website" tabIndex={-1} autoComplete="off" />
       </div>
-      <Button type="submit">Send message</Button>
+      <Button type="submit" loading={pending}>
+        Send message
+      </Button>
     </form>
   );
 }

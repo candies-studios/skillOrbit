@@ -5,10 +5,15 @@ import { Container } from "@/components/layout/primitives";
 import { Avatar } from "@/components/catalog/cards";
 import { CourseGrid } from "@/components/catalog/course-grid";
 import { Badge, SampleBadge } from "@/components/ui/feedback";
-import { getInstructor, listCoursesByInstructor, listInstructors } from "@/lib/catalog/repository";
+import {
+  getInstructor,
+  listCoursesByInstructor,
+  listInstructors,
+  staticParamsOrPlaceholder,
+} from "@/lib/catalog/repository";
 
 export async function generateStaticParams() {
-  return (await listInstructors()).map((i) => ({ slug: i.slug }));
+  return staticParamsOrPlaceholder((await listInstructors()).map((i) => i.slug));
 }
 
 export async function generateMetadata({ params }: PageProps<"/instructors/[slug]">): Promise<Metadata> {
