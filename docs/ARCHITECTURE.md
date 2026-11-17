@@ -55,6 +55,15 @@ tests/e2e              Playwright and axe accessibility checks
 
 **Data access rule:** pages call only `src/lib/catalog/repository.ts` (and future `src/lib/*/repository.ts` modules). In Phase 2/3 the function bodies switch to Supabase queries while the signatures stay the same.
 
+## 2a. Implementation notes (Phases 2–3)
+
+- **Data access:** public pages read one cached catalogue snapshot (`src/lib/catalog/catalog-cache.ts`, tagged `catalog`). Every instructor or admin action calls `updateTag("catalog")`, so changes appear immediately. Account pages use a per-request client acting as the user (`getServerSupabase`), so **RLS is the final authority**. Server checks exist for friendlier errors only.
+- **No service-role key** is used anywhere yet. All writes run as the signed-in user.
+- **Workflow state changes** (submit, publish, approve, roles) happen only through `security definer` RPCs that check the caller and write the audit log. Triggers block direct client edits to workflow and review fields (`is_client_request()` tells API clients apart from RPCs).
+- **Public views** `course_curriculum` and `public_instructors` deliberately run with the owner's rights so visitors can read the outline and approved profiles without access to lesson content or application data. The Supabase security advisor will flag these as "security definer views"; that's intended, and they filter to published/approved rows only.
+- **Uploads** go straight from the browser to Storage, where policies only allow paths under a course the user manages. Server actions re-check the path before saving it.
+- **GitHub Pages build:** `scripts/prepare-static-export.mjs` removes server-only routes and stubs the cached loader in CI only.
+
 ## 3. Database plan (Phase 2)
 
 Migrations live in `supabase/migrations/` and are version-controlled. Conventions:

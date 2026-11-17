@@ -1,103 +1,85 @@
 # Development status
 
-Last updated: 14 November 2026. **Not production-ready.** Auth, database, payments and security testing are not built yet.
+Last updated: 17 November 2026. **Not production-ready.** Payments, the learning player, membership, affiliate tracking, settlements and the security review are still to come.
 
-Legend: `[x]` done and verified · `[~]` partial (UI only, or placeholder) · `[ ]` not started
+Legend: `[x]` done and verified · `[~]` partial · `[ ]` not started
 
 ## Phase 0 — Inspection and plan ✅
 
-- [x] Repository inspected (none existed); project initialised on Next.js 16.4, TypeScript strict, Tailwind v4
-- [x] Architecture, data model, RLS strategy and financial waterfall documented (`docs/ARCHITECTURE.md`)
-- [x] `.env.example` with placeholders only
+- [x] Project initialised (Next.js 16.4, TypeScript strict, Tailwind v4); architecture in `docs/ARCHITECTURE.md`
 
 ## Phase 1 — Brand, design system, public site ✅
 
-**Design system** (`/design-system`, noindex)
+- [x] Design system (`/design-system`), all public pages, policies (drafts for legal review), real 404s
+- [x] GitHub Pages static preview (sample data, no accounts)
 
-- [x] Design tokens (colour, type, radius, shadow, motion) in `globals.css`; brand name in `src/config/brand.ts`
-- [x] Navigation, footer, mobile navigation (sheet)
-- [x] Buttons (8 variants, loading and disabled), inputs, select, textarea, checkbox, accessible `Field` wrapper
-- [x] Course, instructor, category and pricing cards
-- [x] Dashboard KPI widget (shows "No data source connected" instead of a number when there is no data)
-- [x] Table and filter bar
-- [x] Modal, confirmation dialog (async-safe), toast notifications
-- [x] Loading skeletons, empty states, error states, notices (including an "unconfigured" tone)
+## Phase 2 — Supabase, auth, roles, RLS ✅
 
-**Public pages**
+**Database** (`supabase/migrations`, 5 files)
 
-- [x] Homepage: hero with search, categories, featured courses, why-us, outcomes, instructors, membership promo, affiliate promo; testimonials render only when genuine records exist (currently none)
-- [x] Course catalogue with keyword, category, level and price filters and sorting (URL-based, works without JS)
-- [x] Categories index and category pages
-- [x] Course detail with curriculum accordion and preview-lesson markers
-- [x] Instructors index and profiles
-- [x] Membership pricing (checkout disabled and labelled)
-- [x] Affiliate programme, Teach page, About, FAQ, Contact
-- [x] Login, register, forgot password (validated; report "not connected" honestly)
-- [~] Privacy, Terms, Refund policies — **drafts for legal review**, with visible placeholders for business details
-- [x] 404 page (real 404 status via `proxy.ts`), error boundary, sitemap, robots
-- [x] GitHub Pages static preview workflow (`STATIC_EXPORT=true`; catalogue filtering runs client-side so it works statically)
+- [x] All 37 tables, with UUID keys, foreign keys, indexes, check constraints and timestamps
+- [x] Money as `bigint` minor units with a currency check; rates as integer basis points
+- [x] Price, instructor-share and affiliate-rate snapshots on `order_items`
+- [x] Append-only ledgers (order items, earnings, payouts, redemptions, audit log); payment and commission amounts can't be edited
+- [x] RLS enabled on **every** table; clients can't write any financial table
+- [x] Storage: 4 buckets (1 public, 3 private) with path-based policies
+- [x] Role helpers, sign-up trigger (profile + student role), application guards
+- [x] Audited admin RPCs: review instructor/affiliate, set course status, manage admin roles (super admin only; can't remove the last super admin)
+- [x] Seed: the 6 real categories and default platform settings only
+
+**Auth**
+
+- [x] Email/password sign-up with email confirmation, login, logout, forgot/reset password
+- [x] `/auth/confirm` handles both the PKCE `code` and `token_hash` email flows
+- [x] Sessions in cookies (`@supabase/ssr`), refreshed in `proxy.ts`; signed-out visitors redirected from account areas
+- [x] Multi-role: one account can be student, instructor, affiliate and admin at once
+- [x] Server checks with `auth.getUser()`, and RLS enforces the same rules again in the database
+- [x] Open-redirect-safe `?next=` handling
 
 **Verification**
 
-- [x] `npm run typecheck`, `npm run lint`, `npm run build` pass
-- [x] 25 unit tests (money, catalogue filtering, query sanitising, seed integrity, validation)
-- [x] 55 Playwright tests on desktop and mobile: every page renders with no horizontal overflow, no console errors and **no serious or critical axe (WCAG 2 A/AA) violations**; search, filters, real 404s, forms and mobile menu
-- [x] Manual screenshot review at 1440, 768 and 390 px
+- [x] **32 database tests** (`tests/db`, real migrations on PGlite/Postgres 18): RLS for each role, no self-promotion, instructor ownership, lesson-content privacy, entitlements, affiliate and financial privacy, append-only rules, storage paths, support tickets
+- [x] **End-to-end journey, 24 steps, passing 3 runs in a row**, against a local Supabase-compatible stack (Postgres 18 + PostgREST 12 + an auth emulator) through the real UI. It covers: sign-up, login, bad password, role bootstrap, instructor application → approval → course build → review → publish → public page (no video-ID leak) → student enrolment on mobile → access denials → contact ticket → audit log → logout
+- [~] Not yet run against a hosted Supabase project. Use the checklist in `docs/SUPABASE_SETUP.md` after setup, especially the **email links and Storage uploads**: the local stack emulated Auth and didn't include the Storage API.
 
-**Known gaps in Phase 1**
+## Phase 3 — Marketplace and course management ✅ (first release)
 
-- [~] Course imagery is generated cover art; real images come with Storage (Phase 3)
-- [~] Catalogue uses clearly labelled development seed data
-- [ ] Contact messages are not stored (needs `support_tickets` + a server action, Phase 2 — server-only, so not on the Pages preview)
-- [ ] Security headers / CSP not yet configured (Phase 10)
+- [x] Public catalogue, categories, instructors and course pages read from Supabase (cached, refreshed instantly on changes); sample data only when Supabase isn't configured
+- [x] Instructor application, admin approval with revenue share, public instructor profiles
+- [x] Course builder: details, pricing in ₹ (stored in paise), outcomes, cover upload, modules and lessons (add/edit/reorder/delete), free-preview flag, private video IDs, downloadable files (private bucket)
+- [x] Workflow: draft → in review (editing locked) → published / needs changes, plus withdraw, unpublish, archive and delete-draft rules
+- [x] Preview of unpublished courses for owners and admins
+- [x] Admin: overview KPIs from live counts, course review queue with checklist, featuring, categories, applications, users and roles, support tickets, audit log
+- [x] Student dashboard: my courses, notifications, profile, application status; free-course enrolment
+- [x] Contact form saves support tickets
+- [ ] Quiz builder UI (tables and security rules exist) — Phase 4
+- [ ] Instructor sales analytics — Phase 8 (enrolment counts are shown now)
+- [ ] Course-level affiliate commission settings — Phase 7
 
-## Phase 2 — Supabase, auth, roles, RLS
+## Phase 4 — Student learning (next)
 
-- [ ] Supabase project and CLI setup; local dev with `supabase start`
-- [ ] Migrations for all 37 tables, enums, indexes, constraints, triggers
-- [ ] RLS on every table, plus role helper functions
-- [ ] Storage buckets (public and private) with policies
-- [ ] Supabase Auth: email/password, email verification, password reset, SSR session cookies (`@supabase/ssr`)
-- [ ] Protected `/dashboard` and `/admin` routes; multi-role authorisation
-- [ ] Admin-only role approval RPC with audit log
-- [ ] Contact form → `support_tickets`
-- [ ] pgTAP RLS tests and auth/role e2e tests
-
-## Phase 3 — Marketplace and course management
-
-- [ ] Catalogue repository switched to Supabase; slug index from DB
-- [ ] Instructor application and approval workflow
-- [ ] Course builder: modules, lessons, uploads, pricing, preview, draft → review → published or rejected
-- [ ] Admin course and category management
-
-## Phase 4 — Student learning
-
-- [ ] Dashboard, my courses, course player, video abstraction with signed playback
-- [ ] Progress, resume, notes and bookmarks, quizzes and assignments, resources (signed URLs)
-- [ ] Certificates with verification page
+- [ ] Course player with protected video (provider abstraction, signed playback), progress and resume, notes and bookmarks, quizzes and assignments, signed download links, certificates and verification page
 
 ## Phase 5 — Orders and payments (Razorpay test mode)
 
-- [ ] Server-created orders, signature verification, webhooks, idempotency, amount/currency checks
-- [ ] Enrolment only after verified payment; refunds and reversals
-- [ ] Tests: signature, duplicate webhook, amount mismatch, refund reversal
+- [ ] Server-created orders, signature-verified checkout and webhooks, idempotency, amount/currency checks, enrolment after verified payment, refunds and reversals
 
 ## Phase 6 — Membership
 
-- [ ] Plans, subscriptions, states (active, cancelled, expired, past_due, suspended), grace period, entitlements
+- [ ] Plans admin, subscriptions, states, grace period, entitlements (the `has_course_access` function already checks membership windows)
 
 ## Phase 7 — Affiliates
 
-- [ ] Referral codes and links, server-side click tracking, attribution (first or last click, window), self-referral and duplicate prevention, commission ledger, holding period, reversals, payouts
+- [ ] Click tracking, attribution, commission ledger, holding period, reversals, payouts
 
 ## Phase 8 — Instructor earnings
 
-- [ ] Earnings ledger from the waterfall, refund adjustments, manual payouts
+- [ ] Earnings ledger from the distribution waterfall, refund adjustments, manual payouts
 
-## Phase 9 — Admin, CMS, notifications, reporting
+## Phase 9 — Admin analytics, CMS, notifications, reporting
 
-- [ ] KPIs from verified queries, revenue charts, CSV exports, homepage CMS, notifications, email via Resend, audit log viewer
+- [ ] Revenue charts, CSV exports, homepage CMS, email notifications via Resend, platform settings UI
 
-## Phase 10 — Security review, E2E, deployment
+## Phase 10 — Security review, testing, deployment
 
-- [ ] Security headers, rate limiting, dependency audit, full e2e, Vercel deployment and runbook
+- [ ] Security headers/CSP, rate limiting, dependency audit, load test, production runbook

@@ -13,8 +13,7 @@ const isStaticExport = process.env.STATIC_EXPORT === "true";
 const basePath = process.env.PAGES_BASE_PATH || "";
 
 const nextConfig: NextConfig = {
-  // Cache Components / Partial Prerendering need a server; a fully static
-  // export gains nothing from them and Next's export checks reject them.
+  // Static export (GitHub Pages) can't use Cache Components / PPR, which need a server.
   cacheComponents: !isStaticExport,
   partialPrefetching: !isStaticExport,
   turbopack: {

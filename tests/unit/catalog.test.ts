@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { courseStats, filterCourses, parseCourseQuery } from "@/lib/catalog/repository";
+import { courseStats, filterCourses, parseCourseQuery } from "@/lib/catalog/query";
 import { categories, courses, instructors } from "@/lib/catalog/seed";
 import type { Course } from "@/lib/catalog/types";
 

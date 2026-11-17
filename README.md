@@ -2,7 +2,9 @@
 
 An online school and marketplace for practical digital skills: course sales, membership, instructor marketplace and affiliate programme. Built for India first, open internationally.
 
-> **Status:** Phase 1 complete (design system and public website). Not production-ready. See [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md) and [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+> **Status:** Phases 1–3 complete: public site, Supabase database with RLS, accounts and roles, course builder, admin console. Not production-ready (no payments yet). See [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md).
+>
+> **Setting up?** Follow [docs/SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md).
 
 ## Stack
 
@@ -59,10 +61,13 @@ The preview has limits:
 - It shows the public pages with sample data. It is not indexed by search engines.
 - Server features can't run on GitHub Pages: sign-in, database, payments, webhooks, emails and true 404 status codes.
 
-### Vercel: the real app (needed from Phase 2)
+### Vercel: the real app
 
-Import the repo in Vercel and add the env vars from `.env.example`. No build settings need changing. This is where auth, Supabase and Razorpay will run.
+Accounts, dashboards, the course builder and admin only run here. See [docs/SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md) for the full steps.
 
-## Manual setup still to come
+## Project map
 
-Supabase project setup, Razorpay test keys and webhook, and Resend domain verification are documented as each phase lands (see `DEVELOPMENT_STATUS.md`).
+- `supabase/migrations/` — database schema, RLS, RPCs and storage policies (apply in order)
+- `src/app/(site)` — public pages · `src/app/(auth)` — sign-in pages · `src/app/(app)` — dashboard, instructor and admin
+- `src/lib/catalog` — catalogue data (Supabase, or seed fallback) · `src/lib/supabase` — clients · `src/lib/auth` — viewer and role checks
+- `tests/db` — database security tests · `tests/unit` — unit tests · `tests/e2e` — browser tests

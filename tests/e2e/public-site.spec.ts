@@ -18,6 +18,7 @@ const PAGES = [
   "/login",
   "/register",
   "/forgot-password",
+  "/reset-password",
   "/legal/terms",
   "/legal/privacy",
   "/legal/refunds",
@@ -84,7 +85,7 @@ test("register form validates and reports that auth is not connected", async ({ 
   await page.getByLabel("Password").fill("learning123");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByText("Accounts aren’t connected yet")).toBeVisible();
+  await expect(page.getByText("Accounts aren’t connected on this site")).toBeVisible();
 });
 
 test("contact form never claims a message was sent", async ({ page }) => {
